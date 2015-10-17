@@ -123,11 +123,15 @@ app.hookupSteps = function() {
     var city = $('.publisher.selected').data('publisher-city');
     var state = $('.publisher.selected').data('publisher-state');
     var radiusMiles = parseFloat($('#user-selected-radius').val());
+    var locality = $('#user-selected-locality').val();
     var radiusKm =radiusMiles * 1.60934
     var radiusMeters = radiusKm * 1000;
     var oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
+    if(locality){
+      city = locality;
+    }
     app.geocode(address, city, state, function(latlng) {
       // Set the new app state
       var center = new LatLon(latlng[0], latlng[1]);
@@ -172,6 +176,7 @@ app.hookupSteps = function() {
     if ($('#geolocate').val().trim() !== '') app.geolocate();
   });
   $('#user-selected-radius').on('change', app.geolocate);
+  $('#user-selected-locality').on('change', app.geolocate);
   $('#geolocate').on('change', app.geolocate);
   $('#geolocateForm').on('submit', function(){ return false });
 
@@ -282,15 +287,9 @@ app.scrollToElement = function(el) {
 };
 
 app.geocode = function(address, city, state, callback, context) {
-  var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
-  if(city === 'Triangle NC'){
-    address += ' Triangle, NC';
-    url += encodeURIComponent(address);
-  } else {
-    url += encodeURIComponent(address);
-    url += '&components=locality:' + encodeURIComponent(city);
-    url += '|administrative_area:' + encodeURIComponent(state);
-  }
+  var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address);
+      url += '&components=locality:' + encodeURIComponent(city);
+      url += '|administrative_area:' + encodeURIComponent(state);
 
   $.getJSON(url, function(response) {
     if (response.error || response.results.length === 0) {
